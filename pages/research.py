@@ -22,11 +22,12 @@ def dms_to_dd(degrees, minutes, seconds, direction):
     return dd
 
 ### Site Data Initialization ###
-site_name = ['Castroville', 'Hester', 'North', 'Porter', 'Yampah']
-site_ID = ['MCP', 'EKH', 'EKN', 'EKP', 'EKY']
+site_name = ['Porter', 'North', 'Yampah', 'Hester', 'Castroville']
+site_ID = ['EKP', 'EKN', 'EKY', 'EKH', 'MCP']
+
 df_allsites = {}
 for site_index in range(len(site_name)):
-    path = f"/Users/sylvainlabedens/Library/CloudStorage/GoogleDrive-slabeden@ucsc.edu/Shared drives/Paytan Eddy Covariance/EC_Data/{site_name[site_index]}/{site_ID[site_index]}_processed/"
+    path = f"EC_Data/{site_name[site_index]}/{site_ID[site_index]}_processed/"
     file_ext_INPUT = "_ECdata_fluxnet_QC5.csv"
     df_site = create_df(site_index, path, file_ext_INPUT)
     df_allsites[site_name[site_index]] = df_site
