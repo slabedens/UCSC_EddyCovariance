@@ -9,7 +9,7 @@ from datetime import datetime
 ### Functions ###
 def create_df(site_index, path, file_ext):
     file = path + site_ID[site_index] + file_ext
-    df_fluxnet = pd.read_csv(file, sep=',')
+    df_fluxnet = pd.read_csv(file, sep=',', low_memory=False)
     df_fluxnet['datetime'] = pd.to_datetime(df_fluxnet['TIMESTAMP_END'], format='%Y%m%d%H%M')
     df_fluxnet.set_index('datetime', inplace=True)
     df_fluxnet.sort_index(inplace=True)
