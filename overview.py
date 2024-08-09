@@ -46,6 +46,8 @@ sites_dd = {site: {"lat": dms_to_dd(*coords["lat"]), "lon": dms_to_dd(*coords["l
 ### Page Configuration ###
 st.set_page_config(page_title="Sites Overview", page_icon="🌍")
 st.title("UCSC Paytan Lab Sites Overview")
+st.sidebar.markdown("v0.1")  # Markdown to format as bold
+
 
 # UCSC logo
 logo_path = "paytan_lab_logo.png"
@@ -105,7 +107,7 @@ for site in site_name:
         labels={'datetime': 'Month', 'data_gC_m2': 'gC/m²'},
         text='data_gC_m2',
         color='Legend',
-        color_discrete_map={"Carbon source": "#003262", "Carbon sink": "#FDB515"}
+        color_discrete_map={"Carbon source": "#1295D8", "Carbon sink": "#FDB515"}
     )
     fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')  # Display text outside bars
     fig.update_layout(

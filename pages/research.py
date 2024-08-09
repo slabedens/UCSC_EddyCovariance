@@ -33,14 +33,36 @@ for site_index in range(len(site_name)):
     df_allsites[site_name[site_index]] = df_site
 
 st.title("Research View")
+st.sidebar.markdown("v0.1")  # Markdown to format as bold
+logo_path = "paytan_lab_logo.png"
+st.logo(logo_path)
 
 ### Site Selection ###
 selected_site = st.selectbox("Select a Site", options=site_name)
 
 ### Fetch and Display Data ###
 selected_data = df_allsites[selected_site].reset_index()
-fig = px.line(selected_data, x='datetime', y='FC', title=f'Plotly: Flux of Carbon at {selected_site}',
-              labels={'datetime': 'Date Time', 'FC': 'Flux of Carbon (FC)'})
+
+fig = px.line(
+    selected_data,
+    x='datetime',
+    y='FC',
+    title=f'Flux of Carbon at {selected_site}',
+    labels={'datetime': ' ', 'FC': 'Flux of Carbon (FC)'},
+    color_discrete_sequence=['#1295D8']  # Sets the line color
+)
+fig.update_xaxes(rangeslider_visible=True)
+fig.update_layout(hovermode="x")
+st.plotly_chart(fig)
+
+fig = px.line(
+    selected_data,
+    x='datetime',
+    y='FCH4',
+    title=f'Flux of Methane at {selected_site}',
+    labels={'datetime': ' ', 'FCH4': 'Flux of Methane (FCH4)'},
+    color_discrete_sequence=['#1295D8']  # Sets the line color
+)
 fig.update_xaxes(rangeslider_visible=True)
 fig.update_layout(hovermode="x")
 st.plotly_chart(fig)
