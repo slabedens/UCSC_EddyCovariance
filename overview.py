@@ -28,7 +28,7 @@ site_ID = ['EKP', 'EKN', 'EKY', 'EKH', 'MCP']
 df_allsites = {}
 for site_index in range(len(site_name)):
     path = f"EC_Data/{site_name[site_index]}/{site_ID[site_index]}_processed/"
-    file_ext_INPUT = "_ECdata_fluxnet_QC5.csv"
+    file_ext_INPUT = "_ECdata_flux_QC0.csv"
     df_site = create_df(site_index, path, file_ext_INPUT)
     df_allsites[site_name[site_index]] = df_site
 

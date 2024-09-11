@@ -15,12 +15,6 @@ def create_df(site_index, path, file_ext):
     df_fluxnet.sort_index(inplace=True)
     return df_fluxnet
 
-def dms_to_dd(degrees, minutes, seconds, direction):
-    dd = degrees + (minutes/60) + (seconds/3600)
-    if direction in ['S', 'W']:  # South and West should be negative
-        dd *= -1
-    return dd
-
 ### Site Data Initialization ###
 site_name = ['Porter', 'North', 'Yampah', 'Hester', 'Castroville']
 site_ID = ['EKP', 'EKN', 'EKY', 'EKH', 'MCP']
