@@ -22,7 +22,7 @@ site_ID = ['EKP', 'EKN', 'EKY', 'EKH', 'MCP']
 df_allsites = {}
 for site_index in range(len(site_name)):
     path = f"EC_Data/{site_name[site_index]}/{site_ID[site_index]}_processed/"
-    file_ext_INPUT = "_ECdata_flux_QC0.csv"
+    file_ext_INPUT = "_ECdata_flux_QC5.csv"
     df_site = create_df(site_index, path, file_ext_INPUT)
     df_allsites[site_name[site_index]] = df_site
 
@@ -52,9 +52,33 @@ st.plotly_chart(fig)
 fig = px.line(
     selected_data,
     x='datetime',
+    y='FC_GF',
+    title=f'Flux of Carbon at {selected_site}',
+    labels={'datetime': ' ', 'FC_GF': 'Flux of Carbon (FC_GF)'},
+    color_discrete_sequence=['#1295D8']  # Sets the line color
+)
+fig.update_xaxes(rangeslider_visible=True)
+fig.update_layout(hovermode="x")
+st.plotly_chart(fig)
+
+fig = px.line(
+    selected_data,
+    x='datetime',
     y='FCH4',
     title=f'Flux of Methane at {selected_site}',
     labels={'datetime': ' ', 'FCH4': 'Flux of Methane (FCH4)'},
+    color_discrete_sequence=['#1295D8']  # Sets the line color
+)
+fig.update_xaxes(rangeslider_visible=True)
+fig.update_layout(hovermode="x")
+st.plotly_chart(fig)
+
+fig = px.line(
+    selected_data,
+    x='datetime',
+    y='FCH4_GF',
+    title=f'Flux of Methane at {selected_site}',
+    labels={'datetime': ' ', 'FCH4_GF': 'Flux of Methane (FCH4_GF)'},
     color_discrete_sequence=['#1295D8']  # Sets the line color
 )
 fig.update_xaxes(rangeslider_visible=True)
