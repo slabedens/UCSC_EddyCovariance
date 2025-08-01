@@ -84,7 +84,7 @@ with st.container():
         folium_static(m, width=None, height=300)
 
     with col2:
-        st.subheader("Cumulative Sum of NEE")
+        st.subheader("Cumulative CO₂ Flux")
 
         df_fc_monthly = []
         for site in site_name:
@@ -94,7 +94,7 @@ with st.container():
             cumulative = monthly_sum.cumsum()
             temp = pd.DataFrame({
                 'Year': cumulative.index,
-                'Cumulative NEE [gC/m²]': cumulative.values,
+                'Cumulative FC [gC/m²]': cumulative.values,
                 'Site': site
             })
             df_fc_monthly.append(temp)
@@ -105,7 +105,7 @@ with st.container():
         fig = px.line(
             df_fc_plot,
             x='Year',
-            y='Cumulative NEE [gC/m²]',
+            y='Cumulative FC [gC/m²]',
             color='Site',
             color_discrete_sequence=uc_colors_hex
         )
