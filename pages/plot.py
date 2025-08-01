@@ -47,7 +47,7 @@ for site_index in range(len(site_name)):
     df_allsites[site_name[site_index]] = df_site
 
 ### Page configuration ###
-st.title("Explore raw data after QA/QC")
+st.title("Explore 30min data after QA/QC")
 st.sidebar.markdown("v1.0")  # Markdown to format as bold
 logo_path = "paytan_lab_logo.png"
 #st.sidebar.image(logo_path)
