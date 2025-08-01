@@ -36,7 +36,7 @@ sites_dd = {site: {"lat": dms_to_dd(*coords["lat"]), "lon": dms_to_dd(*coords["l
 
 ### Page Configuration ###
 st.set_page_config(page_title="Sites Overview", page_icon="🌍")
-st.title("UCSC Carbon Monitoring Platform")
+st.title("UCSC Carbon Monitoring Platform youhou!!!")
 st.sidebar.markdown("v1.0")
 
 # UCSC logo
