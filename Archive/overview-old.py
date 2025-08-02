@@ -128,7 +128,7 @@ for site in site_name:
             griddash='dot',
             tickfont=dict(size=25)
         ),
-        title_x=0.4,  # Center the title
+        title_x=0.0,  # Center the title
         title_y=0.9, # Center the title
         title_font=dict(
         size=30  # Adjust the size of the title
