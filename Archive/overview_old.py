@@ -48,8 +48,7 @@ st.logo(logo_path)
 # --- SIDEBAR --------------------------------------------------------------------------------------------------------
 
 data_type = st.sidebar.selectbox('Select Gas', ['GHG', 'CH4','CO2']) 
-time_type = st.sidebar.selectbox('Select time aggregation', ['Daily', 'Monthly','Yearly']) 
-st.sidebar.markdown("v1.1")
+st.sidebar.markdown("v1.0")
 
 
 # --- CONTAINER 1 MAP --------------------------------------------------------------------------------------------------------
@@ -120,7 +119,7 @@ with st.container():
                 ylabel = 'Cumulative GHG [g-CO₂eq/m²]'
                 dtick_type = 500
 
-            monthly_cumsum = data_30min.resample('M').sum().cumsum().round(2)
+            monthly_cumsum = data_30min.resample('M').sum().cumsum()
             df_monthly_site = pd.DataFrame({
                 'Year': monthly_cumsum.index,
                 ylabel: monthly_cumsum.values,
@@ -192,69 +191,42 @@ with st.container():
     end_date = pd.Timestamp.today() 
 
     for site in site_name:
-        df = df_allsites[site]
+        df = df_allsites[site].copy()
         df.reset_index(inplace=True)
         df['datetime'] = pd.to_datetime(df['datetime'])
 
-
         if data_type == 'CO2':
-            df['data_g_m2'] = df['FC_GF'] * 12.0107 * 10**(-6) * 30 * 60
-            yaxis_range_type = [-11, 9]
-            dtick_type = 2
-            unit = 'gC/m²'
+            df['data_gC_m2'] = df['FC_GF'] * 12.0107 * 10**(-6) * 30 * 60
+            dtick=2
+
         elif data_type == 'CH4':
-            df['data_g_m2'] = df['FCH4_GF'] * 12.0107 * 10**(-9) * 30 * 60
-            yaxis_range_type = [-0.19,0.19]
-            dtick_type = 0.05
-            unit = 'gC/m²'
+            df['data_gC_m2'] = df['FCH4_GF'] * 12.0107 * 10**(-9) * 30 * 60
+            dtick=2 
+
         else :
-            df['data_g_m2'] = df['FC_GF'] * 44 * 10**(-6) * 30 * 60 + df['FCH4_GF'] * 16 * 10**(-9) * 30 * 60 * CH4_GWP
-            yaxis_range_type = [-41,41]
-            dtick_type = 10
-            unit = 'g-CO₂eq/m²'
-
-        # Select time aggregation
-        if time_type == 'Monthly':
-            data_agg = df.resample('M', on='datetime')['data_g_m2'].sum().round(2).reset_index()
-            yaxis_range_type = [x * 25 for x in yaxis_range_type] 
-            dtick_type = dtick_type *20
-            freq = 'month'
-        elif time_type == 'Yearly':
-            data_agg = df.resample('Y', on='datetime')['data_g_m2'].sum().round(2).reset_index().assign(
-          datetime=lambda d: d['datetime'].dt.to_period('Y').dt.to_timestamp() + pd.DateOffset(months=6)
-      )
+            df['data_gCO2_m2'] = df['FC_GF'] * 44 * 10**(-6) * 30 * 60 + df['FCH4_GF'] * 16 * 10**(-9) * 30 * 60 * CH4_GWP
+            dtick=2 
 
 
-            yaxis_range_type = [x * 70 for x in yaxis_range_type] 
-            dtick_type = dtick_type *50
-            freq = 'year'
-        else :
-            data_agg = df.resample('D', on='datetime')['data_g_m2'].sum().round(3).reset_index()
-            yaxis_range_type = [x * 1 for x in yaxis_range_type] 
-            freq = 'day'
+        # Ensure end_date captures the latest date in the data for proper axis scaling
+        if end_date is None or df['datetime'].max() > end_date:
+            end_date = df['datetime'].max()
 
-        data_agg['Legend'] = data_agg['data_g_m2'].apply(lambda x: 'Carbon sink' if x < 0 else 'Carbon source')
-        ylabel_agg = f"{unit}/{freq}"
+        # Monthly aggregation
+        daily_data = df.resample('D', on='datetime')['data_gC_m2'].sum().reset_index()
+        daily_data['Legend'] = daily_data['data_gC_m2'].apply(lambda x: 'Carbon sink' if x < 0 else 'Carbon source')
 
         # Plotting the data with bar values
         fig = px.bar(
-            data_agg,
+            daily_data,
             x='datetime',
-            y='data_g_m2',
-            title=f'{time_type} {data_type} balance at {site}',
-            labels={'data_g_m2': ylabel_agg},
-            #text=np.round(data_agg['data_g_m2'],2),
+            y='data_gC_m2',
+            title=f'Daily {data_type} balance at {site}',
+            labels={'datetime': '', 'data_gC_m2': 'gC/m²/day'},
+            text='data_gC_m2',
             color='Legend',
             color_discrete_map={"Carbon source": "#1295D8", "Carbon sink": "#FFB511"}
         )
-
-        # Forcer position selon le signe : toujours 'outside'
-        #textpos = ["outside" for _ in data_agg['data_g_m2']]
-        #fig.update_traces(
-        #    texttemplate="<b>%{text:.2f}</b>",
-        #    textposition="outside",
-        #    cliponaxis=False
-        #)
         #fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')  # Display text outside bars
         fig.update_layout(
             plot_bgcolor='white',  # Set plot background to white
@@ -262,9 +234,8 @@ with st.container():
             bargap=0.1,  # Adjust space between bars (lower value = wider bars)
             xaxis_tickformat='%Y-%m',
             xaxis_range=[start_date, end_date],
-            yaxis_range=yaxis_range_type ,
+            yaxis_range=[-11, 9]if data_type == 'CO2' else [-0.19,0.19] ,
             xaxis=dict(
-                title="",
                 dtick="M1",  # Tick every month
                 tickformat="%b\n%Y",  # Display abbreviated month and full year
                 tickfont=dict(size=10)
@@ -274,14 +245,14 @@ with st.container():
             ),
 
             yaxis=dict(
-                dtick=dtick_type, 
+                dtick=2 if data_type == 'CO2' else 0.05, 
                 showgrid=True,  # Ensure grid lines are visible
                 gridcolor='lightgray',  # Set the grid line color
                 gridwidth=0.5,  # Set the grid line thickness
                 griddash='dot',
                 tickfont=dict(size=10)
             ),
-            title_x=0.3,  # Center the title
+            #title_x=0.3,  # Center the title
             title_y=0.85, # Center the title
             title_font=dict(
             size=15  # Adjust the size of the title
