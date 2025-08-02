@@ -81,7 +81,7 @@ with st.container():
 
     with col1:
         st.subheader("Eddy Covariance Site Map")
-        folium_static(m, width=None, height=300)
+        folium_static(m, width=None, height=400)
 
     with col2:
         st.subheader("Cumulative CO₂ Flux")
@@ -121,7 +121,7 @@ with st.container():
 
         # Style layout
         fig.update_layout(
-            height=310,
+            height=400,
             margin=dict(l=0, r=0, t=0, b=0),
             yaxis=dict(
                 tick0=0,
