@@ -281,7 +281,7 @@ with st.container():
                 griddash='dot',
                 tickfont=dict(size=10)
             ),
-            title_x=0.0,  # Center the title
+            title_x=0.5,  # Center the title
             title_y=0.85, # Center the title
             title_font=dict(
             size=15  # Adjust the size of the title
