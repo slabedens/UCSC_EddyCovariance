@@ -54,13 +54,13 @@ with st.sidebar:
     version_label = "(gap-filled)" if use_gapfilled else "(no gap-fill)"
 
     st.divider()
-    st.header("Gap-Filling model R²")
+    st.header("Gap-Filling ANN R²")
 
     perf = pd.DataFrame(
         {
             "Site": ["Castroville", "Hester", "North", "Porter", "Yampah"],
-            "CO2 Flux R²": ["0.92", "0.48", "0.32", "0.81", "0.81"],
-            "CH4 Flux R²": ["0.58", "0.37", "0.61", "0.11", "0.12"],
+            "CO2 Flux": ["0.92", "0.48", "0.32", "0.81", "0.81"],
+            "CH4 Flux": ["0.58", "0.37", "0.61", "0.11", "0.12"],
         }
     )
 
