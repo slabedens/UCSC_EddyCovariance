@@ -48,11 +48,11 @@ for site_index in range(len(site_name)):
 
 ### Page configuration ###
 st.title("Explore 30min data after QA/QC")
-st.sidebar.markdown("v1.1")  # Markdown to format as bold
-logo_path = "paytan_lab_logo.png"
-#st.sidebar.image(logo_path)
 
-
+# --- SIDEBAR --------------------------------------------------------------------
+with st.sidebar:
+    st.caption("")
+    st.caption("v1.2")
 
 # --- CONTAINER 1 --------------------------------------------------------------------------------------------------------
 with st.container():

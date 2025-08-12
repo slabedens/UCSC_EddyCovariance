@@ -37,19 +37,40 @@ sites_dd = {site: {"lat": dms_to_dd(*coords["lat"]), "lon": dms_to_dd(*coords["l
             for site, coords in sites_dms.items()}
 
 
-# --- PAGE CONFIGURATION --------------------------------------------------------------------------------------------------------
+# --- PAGE TITLE --------------------------------------------------------------------------------------------------------
 
-st.set_page_config(page_title="Sites Overview", page_icon="🌍")
-st.title("UCSC Greenhouse Gases Monitoring Platform")
-logo_path = "paytan_lab_logo.png"
-st.logo(logo_path)            
+st.title("UCSC Greenhouse Gases Monitoring Platform")         
 
+# --- SIDEBAR --------------------------------------------------------------------
+with st.sidebar:
+    st.header("Data and Time Settings")
 
-# --- SIDEBAR --------------------------------------------------------------------------------------------------------
+    data_type = st.selectbox("Select Gas", ["GHG", "CH4", "CO2"])
+    time_type = st.selectbox("Select time aggregation", ["Daily", "Monthly", "Yearly"])
 
-data_type = st.sidebar.selectbox('Select Gas', ['GHG', 'CH4','CO2']) 
-time_type = st.sidebar.selectbox('Select time aggregation', ['Daily', 'Monthly','Yearly']) 
-st.sidebar.markdown("v1.1")
+    use_gapfilled = st.toggle("Use gap-filled data", value=True)
+    CO2_COL  = "FC_GF"   if use_gapfilled else "FC"
+    CH4_COL  = "FCH4_GF" if use_gapfilled else "FCH4"
+    version_label = "(gap-filled)" if use_gapfilled else "(no gap-fill)"
+
+    st.divider()
+    st.header("Gap-Filling ANN model Performance ")
+
+    perf = pd.DataFrame(
+        {
+            "Site": ["Castroville", "Hester", "North", "Porter", "Yampah"],
+            "CO2 Flux R²": ["0.92", "0.48", "0.32", "0.81", "0.81"],
+            "CH4 Flux R²": ["0.58", "0.37", "0.61", "0.11", "0.12"],
+        }
+    )
+
+    st.sidebar.dataframe(
+        perf,
+        hide_index=True,
+    )
+    
+    st.caption("")
+    st.caption("v1.2")
 
 
 # --- CONTAINER 1 MAP --------------------------------------------------------------------------------------------------------
@@ -94,92 +115,83 @@ with st.container():
         folium_static(m, width=None, height=400)
 
 
-# --- CONTAINER 1 CUMUL GRAPH --------------------------------------------------------------------------------------------------------
-    
-    with col2:
-        st.subheader(f"Cumulative {data_type} Flux")
-        
-        CH4_GWP=27
-        df_monthly_all = []
+# --- CONTAINER 1 CUMUL GRAPH ----------------------------------------------------
+with col2:
+    st.subheader(f"Cumulative {data_type} Flux  {version_label}")
 
-        for site in site_name:
-            df = df_allsites[site]
+    CH4_GWP = 27
+    df_monthly_all = []
 
-            if data_type == 'CO2':
-                data_30min = df['FC_GF'] * 12.0107 * 10**(-6) * 30 * 60
-                ylabel = 'Cumulative FC [gC/m²]'
-                dtick_type = 200
+    for site in site_name:
+        df = df_allsites[site]
 
-            elif data_type == 'CH4':
-                data_30min = df['FCH4_GF'] * 12.0107 * 10**(-9) * 30 * 60
-                ylabel = 'Cumulative FCH4 [gC/m²]'
-                dtick_type = 2
+        if data_type == 'CO2':
+            data_30min = df[CO2_COL] * 12.0107e-6 * 30 * 60
+            ylabel = 'Cumulative FC [gC/m²]'
+            dtick_type = 200
 
-            else :
-                data_30min = df['FC_GF'] * 44 * 10**(-6) * 30 * 60 + df['FCH4_GF'] * 16 * 10**(-9) * 30 * 60 * CH4_GWP
-                ylabel = 'Cumulative GHG [g-CO₂eq/m²]'
-                dtick_type = 500
+        elif data_type == 'CH4':
+            data_30min = df[CH4_COL] * 12.0107e-9 * 30 * 60
+            ylabel = 'Cumulative FCH4 [gC/m²]'
+            dtick_type = 2
 
-            monthly_cumsum = data_30min.resample('M').sum().cumsum().round(2)
-            df_monthly_site = pd.DataFrame({
-                'Year': monthly_cumsum.index,
-                ylabel: monthly_cumsum.values,
-                'Site': site
-            })
-            df_monthly_all.append(df_monthly_site)
-
-        df_plot = pd.concat(df_monthly_all)
-
-        # Create plot
-        fig = px.line(
-            df_plot,
-            x='Year',
-            y=ylabel,
-            color='Site',
-            color_discrete_sequence=uc_colors_hex
-        )
-
-        # Add thick zero line
-        fig.add_hline(
-            y=0,
-            line_width=2,
-            line_color='#EEEEEE',
-            line_dash='solid',
-            layer="below"
-        )
-
-        # Style layout
-        fig.update_layout(
-            height=410,
-            autosize=False,
-            margin=dict(l=0, r=0, t=0, b=0),
-            yaxis=dict(
-                tick0=0,
-                dtick=dtick_type,
-                showgrid=True,
-                gridcolor='#EEEEEE',
-                gridwidth=1
-            ),
-            xaxis=dict(
-                showgrid=True,
-                gridcolor='#EEEEEE',
-                gridwidth=1
-            ),
-            legend=dict(
-                orientation="h",        # horizontal
-                x=-0.01,                  # centré horizontalement
-                y=10.1,                 # en dessous de l'axe (tu peux ajuster, ex -0.1 ou -0.25)
-                xanchor="left",
-                yanchor="top",          # y est la position de son bord supérieur
-                #bgcolor="rgba(255,255,255,0.7)",
-                itemsizing="constant",
-                #itemwidth=30
-                #bordercolor="lightgray",
-                #borderwidth=0.8
+        else:
+            data_30min = (
+                df[CO2_COL] * 44e-6 * 30 * 60 +               # CO2 → g CO2
+                df[CH4_COL] * 16e-9 * 30 * 60 * CH4_GWP       # CH4 → g CO2eq
             )
-        )
+            ylabel = 'Cumulative GHG [g-CO₂eq/m²]'
+            dtick_type = 500
 
-        st.plotly_chart(fig, use_container_width=True)
+        # --- key change: keep NaN for months with no data ---
+        monthly_sum = data_30min.resample('D').sum(min_count=1)   # empty month → NaN (not 0)
+
+        # cumulative only over valid months; keep NaN where no data so the line breaks
+        monthly_cumsum = monthly_sum.copy()
+        monthly_cumsum.loc[monthly_sum.notna()] = monthly_sum.dropna().cumsum().round(2).values
+
+        df_monthly_site = pd.DataFrame({
+            'Year': monthly_cumsum.index,
+            ylabel: monthly_cumsum.values,
+            'Site': site
+        })
+        df_monthly_all.append(df_monthly_site)
+
+    df_plot = pd.concat(df_monthly_all, ignore_index=True)
+
+    # Create plot
+    fig = px.line(
+        df_plot,
+        x='Year',
+        y=ylabel,
+        color='Site',
+        color_discrete_sequence=uc_colors_hex
+    )
+
+    # do not connect across gaps
+    fig.update_traces(connectgaps=False)
+
+    # Add thick zero line
+    fig.add_hline(y=0, line_width=2, line_color='#EEEEEE', line_dash='solid', layer="below")
+
+    # Style layout
+    fig.update_layout(
+        height=410,
+        autosize=False,
+        margin=dict(l=0, r=0, t=0, b=0),
+        yaxis=dict(tick0=0, dtick=dtick_type, showgrid=True, gridcolor='#EEEEEE', gridwidth=1),
+        xaxis=dict(showgrid=True, gridcolor='#EEEEEE', gridwidth=1),
+        legend=dict(
+            orientation="h",
+            x=-0.01,
+            y=10.1,
+            xanchor="left",
+            yanchor="top",
+            itemsizing="constant",
+        )
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 # --- CONTAINER 2 --------------------------------------------------------------------------------------------------------
 
@@ -192,26 +204,21 @@ with st.container():
     end_date = pd.Timestamp.today() 
 
     for site in site_name:
-        df = df_allsites[site]
-        df.reset_index(inplace=True)
+        df = df_allsites[site].reset_index()
         df['datetime'] = pd.to_datetime(df['datetime'])
 
-
         if data_type == 'CO2':
-            df['data_g_m2'] = df['FC_GF'] * 12.0107 * 10**(-6) * 30 * 60
-            yaxis_range_type = [-11, 9]
-            dtick_type = 2
-            unit = 'gC/m²'
+            df['data_g_m2'] = df[CO2_COL] * 12.0107e-6 * 30 * 60
+            yaxis_range_type = [-11, 9]; dtick_type = 2; unit = 'gC/m²'
+
         elif data_type == 'CH4':
-            df['data_g_m2'] = df['FCH4_GF'] * 12.0107 * 10**(-9) * 30 * 60
-            yaxis_range_type = [-0.19,0.19]
-            dtick_type = 0.05
-            unit = 'gC/m²'
-        else :
-            df['data_g_m2'] = df['FC_GF'] * 44 * 10**(-6) * 30 * 60 + df['FCH4_GF'] * 16 * 10**(-9) * 30 * 60 * CH4_GWP
-            yaxis_range_type = [-41,41]
-            dtick_type = 10
-            unit = 'g-CO₂eq/m²'
+            df['data_g_m2'] = df[CH4_COL] * 12.0107e-9 * 30 * 60
+            yaxis_range_type = [-0.19, 0.19]; dtick_type = 0.05; unit = 'gC/m²'
+
+        else:
+            CH4_GWP = 27
+            df['data_g_m2'] = (df[CO2_COL] * 44e-6 * 30 * 60 + df[CH4_COL] * 16e-9 * 30 * 60 * CH4_GWP)
+            yaxis_range_type = [-41, 41]; dtick_type = 10; unit = 'g-CO₂eq/m²'
 
         # Select time aggregation
         if time_type == 'Monthly':
@@ -241,7 +248,7 @@ with st.container():
             data_agg,
             x='datetime',
             y='data_g_m2',
-            title=f'{time_type} {data_type} balance at {site}',
+            title=f'{time_type} {data_type} balance at {site} {version_label}',
             labels={'data_g_m2': ylabel_agg},
             #text=np.round(data_agg['data_g_m2'],2),
             color='Legend',
@@ -281,7 +288,7 @@ with st.container():
                 griddash='dot',
                 tickfont=dict(size=10)
             ),
-            title_x=0.4,  # Center the title
+            title_x=0.3,  # Center the title
             title_y=0.85, # Center the title
             title_font=dict(
             size=15  # Adjust the size of the title
