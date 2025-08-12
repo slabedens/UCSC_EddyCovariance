@@ -54,7 +54,7 @@ with st.sidebar:
     version_label = "(gap-filled)" if use_gapfilled else "(no gap-fill)"
 
     st.divider()
-    st.header("Gap-Filling ANN R²")
+    st.header("Gap-Filling ANN model R²")
 
     perf = pd.DataFrame(
         {
