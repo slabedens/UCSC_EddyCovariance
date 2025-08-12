@@ -98,12 +98,6 @@ with st.container():
             control=True
         ).add_to(m)
 
-        # … add markers, layer control, etc.
-        folium.LayerControl().add_to(m)
-
-        # this makes it expand to the column width
-        st_folium(m, height=400, use_container_width=True)
-
         # Use UC brand hex colors
         uc_colors_hex = ['#005581', '#72CDF4', '#FFB511', '#FFE552', '#7C7E7F']
 
@@ -120,9 +114,11 @@ with st.container():
                 fill_opacity=0.9
             ).add_to(m)
 
+        # … add markers, layer control, etc.
         folium.LayerControl().add_to(m)
 
-        folium_static(m, width=None, height=400)
+        # this makes it expand to the column width
+        st_folium(m, height=400, use_container_width=True)
 
 
 # --- CONTAINER 1 CUMUL GRAPH ----------------------------------------------------
