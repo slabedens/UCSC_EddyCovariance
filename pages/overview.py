@@ -6,6 +6,7 @@ from streamlit_folium import folium_static
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
+from streamlit_folium import st_folium
 
 # --- DATA DOWNLOAD --------------------------------------------------------------------------------------------------------
 
