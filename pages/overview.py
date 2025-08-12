@@ -82,10 +82,13 @@ with st.container():
     with col1:
         st.subheader("Eddy Covariance Site Map")
 
-        ### Create and display the Folium map with UC brand colors ###
-        m = folium.Map(location=[36.82, -121.76], zoom_start=12)
+        m = folium.Map(
+            location=[36.82, -121.76],
+            zoom_start=12,
+            width="100%",      # let Leaflet fill the container
+            height=400
+        )
 
-        # Esri satellite basemap
         folium.TileLayer(
             tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
             attr='Esri',
@@ -93,6 +96,12 @@ with st.container():
             overlay=False,
             control=True
         ).add_to(m)
+
+        # … add markers, layer control, etc.
+        folium.LayerControl().add_to(m)
+
+        # this makes it expand to the column width
+        st_folium(m, height=400, use_container_width=True)
 
         # Use UC brand hex colors
         uc_colors_hex = ['#005581', '#72CDF4', '#FFB511', '#FFE552', '#7C7E7F']
