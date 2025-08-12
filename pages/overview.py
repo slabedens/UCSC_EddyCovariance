@@ -144,7 +144,7 @@ with col2:
             dtick_type = 500
 
         # --- key change: keep NaN for months with no data ---
-        monthly_sum = data_30min.resample('M').sum(min_count=1)   # empty month → NaN (not 0)
+        monthly_sum = data_30min.resample('D').sum(min_count=1)   # empty month → NaN (not 0)
 
         # cumulative only over valid months; keep NaN where no data so the line breaks
         monthly_cumsum = monthly_sum.copy()
