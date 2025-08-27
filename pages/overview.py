@@ -17,7 +17,7 @@ site_ID = ['MCP', 'EKH', 'EKN', 'EKP','EKY']
 df_allsites = {}
 for site_index in range(len(site_name)):
     path = f"EC_Data/{site_name[site_index]}/{site_ID[site_index]}_processed/"
-    df_site = pd.read_csv(f"{path}{site_ID[site_index]}_ECdata_QC9.csv", parse_dates=['datetime'], index_col='datetime')
+    df_site = pd.read_csv(f"{path}{site_ID[site_index]}_ECdata_QC9_nocluster.csv", parse_dates=['datetime'], index_col='datetime')
     df_allsites[site_name[site_index]] = df_site
 
 ### Coordinate Conversion ###
